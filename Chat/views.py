@@ -24,7 +24,8 @@ def index(request):
 @api_view(['GET', 'POST'])
 def user_list(request):
     """
-    List all code snippets, or create a new snippet.
+    Api request for all users in the system, check.
+    Extract Object from db get call / post create one.
     """
     if request.method == 'GET':
         users = User.objects.all()
@@ -41,7 +42,9 @@ def user_list(request):
 
 @api_view(['GET', 'POST'])
 def get_message_by_id(request,user_id):
-
+     """
+     Get request for all messages by user id
+     """
     if request.method == 'GET':
         messaging_sender = list(Messaging.objects.filter(sender=user_id))
         messaging_reciver = list(Messaging.objects.filter(recevier=user_id))
@@ -53,23 +56,26 @@ def get_message_by_id(request,user_id):
 
 @api_view(['GET', 'POST'])
 def unread_message_by_id(request,user_id):
+     """
+     Get request for all unread messages by user id
+     using object.filter Q.
+     """
+    
     if request.method == 'GET':
         messaging_sender = list(Messaging.objects.filter(Q(sender=user_id) &Q(readable='false')))
         messaging_reciver = list(Messaging.objects.filter(Q(recevier=user_id) & Q(readable= 'false')))
         messaging = set(messaging_sender + messaging_reciver)
         serializer = Messagingserializer(messaging, many=True)
-        #if  list(serializer.data['readable']) == "false":
         structure = serializer.data
-        # check = structure[0]['readable']
-        # if check == 'false':
         return Response(serializer.data)
-        # else:
-        #     return JsonResponse({'status': 'false', 'message': "All the message have beenn red"}, status=500)
-
-
+        
 
 @api_view(['GET', 'POST'])
 def read_message_by_id(request,message_id):
+     """
+     Get request messages by message id
+     using object.filter Q.
+     """
     if request.method == 'GET':
         messaging = Messaging.objects.filter(message_id=message_id)
         serializer = Messagingserializer(messaging, many=True)
@@ -79,6 +85,10 @@ def read_message_by_id(request,message_id):
 
 @api_view(['GET', 'POST','DELETE'])
 def delete_message(request,message_id):
+     """
+     Delete request for  messages by message id
+    
+     """
     if request.method == 'DELETE':
         messaging = Messaging.objects.filter(message_id=message_id)
         serializer = Messagingserializer(messaging, many=True)
@@ -96,7 +106,9 @@ def delete_message(request,message_id):
 @api_view(['POST'])
 @permission_classes((AllowAny,))
 def create_message(request):
-
+     """
+     create message
+     """
     if request.method == 'POST':
         data = JSONParser().parse(request)
 
